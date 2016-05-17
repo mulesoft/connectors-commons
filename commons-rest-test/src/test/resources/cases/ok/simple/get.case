@@ -1,0 +1,16 @@
+{
+    "request" : {
+        "path" : "http://www.google.com",
+        "queryParams" : {
+            "q" : "Viva Peron Carajo"
+        },
+        "method" :  "GET",
+        "body" : "LOREM IPSUM DOLOR SIT AMET"
+    },
+    "assertions" : [
+        {
+            "type" : "contains",
+            "expected" : "Google"
+        }
+    ]
+}

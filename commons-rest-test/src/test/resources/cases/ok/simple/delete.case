@@ -1,0 +1,31 @@
+{
+    "request" : {
+        "path" : "http://www.google.com",
+        "method" : "DELETE"
+    },
+    "assertions" : [
+        {
+            "type" : "equals",
+             "expected" : "Failing!"
+        },
+        {
+            "type" : "hasHeader",
+             "expected" : "Accept"
+        },
+        {
+            "type" : "headerEquals",
+             "expectedKey" : "Content-Type",
+             "expectedValue" : "text/html"
+        },
+        {
+            "type" : "headerEquals",
+             "expectedKey" : "Non-existing",
+             "expectedValue" : "text/html"
+        },
+        {
+            "type" : "headerEquals",
+             "expectedKey" : "Content-Type",
+             "expectedValue" : "text/html; charset=UTF-8"
+        }
+    ]
+}

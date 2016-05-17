@@ -1,0 +1,8 @@
+{
+    "request" : {
+        "path" : "http://www.google.com",
+        "method" : "PUT"
+    },
+    "assertions" : [
+    ]
+}
