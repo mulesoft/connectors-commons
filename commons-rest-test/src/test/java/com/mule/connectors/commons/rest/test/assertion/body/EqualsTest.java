@@ -50,7 +50,7 @@ public class EqualsTest {
     @Test
     public void describeToTest() {
         Description description = mock(Description.class);
-        expect(description.appendText(eq("Request body is "))).andReturn(description);
+        expect(description.appendText(eq("SimpleRequest body is "))).andReturn(description);
         expect(description.appendValue(eq(DEFAULT_BODY))).andReturn(description);
         replay(description);
         new Equals(DEFAULT_BODY).describeTo(description);

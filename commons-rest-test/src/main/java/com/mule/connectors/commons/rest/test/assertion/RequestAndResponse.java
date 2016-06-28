@@ -4,6 +4,7 @@ import com.mule.connectors.commons.rest.builder.request.Request;
 
 import javax.ws.rs.core.Response;
 
+
 public class RequestAndResponse {
     private final Request request;
     private final Response response;

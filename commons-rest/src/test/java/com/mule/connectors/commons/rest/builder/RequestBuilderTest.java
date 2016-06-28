@@ -1,6 +1,7 @@
 package com.mule.connectors.commons.rest.builder;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.mule.connectors.commons.rest.builder.handler.ResponseHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.easymock.EasyMock;
@@ -62,7 +63,7 @@ public class RequestBuilderTest {
 
     @Test
     public void testDifferentPathParams() {
-        validator.pathParams = ImmutableMap.<String, Object>builder().put("test", "test").put("test2", "test2").build();
+        validator.pathParams = ImmutableMap.<String, String>builder().put("test", "test").put("test2", "test2").build();
         validator.validateGet();
     }
 
@@ -148,7 +149,7 @@ public class RequestBuilderTest {
         private Response response;
         private ResponseHandler<?> responseHandler;
         private String path;
-        private Map<String, Object> pathParams;
+        private Map<String, String> pathParams;
         private MultivaluedMap<String, String> queryParams;
         private Map<String, Object> headers;
         private String username;
@@ -200,10 +201,10 @@ public class RequestBuilderTest {
             expect(invocationBuilder.accept(eq(accept))).andReturn(invocationBuilder);
             expect(target.path(eq(path))).andReturn(target);
             expect(target.getUri()).andReturn(URI.create(path));
-            for (Map.Entry<String, Object> entry : pathParams.entrySet()) {
+            for (Map.Entry<String, String> entry : pathParams.entrySet()) {
                 requestBuilder.pathParam(entry.getKey(), entry.getValue());
             }
-            expect(target.resolveTemplates(eq(pathParams))).andReturn(target);
+            expect(target.resolveTemplates(eq(Maps.<String, Object>newHashMap(pathParams)))).andReturn(target);
             requestBuilder.queryParams(queryParams);
             for (Map.Entry<String, List<String>> entry : queryParams.entrySet()) {
                 if (entry.getValue() != null && !entry.getValue().isEmpty() && StringUtils.isNotBlank(entry.getValue().get(0))) {

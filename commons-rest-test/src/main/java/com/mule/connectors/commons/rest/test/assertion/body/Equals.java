@@ -20,6 +20,6 @@ public class Equals extends ResponseBodyAssertion {
 
     @Override
     public void describeTo(Description description) {
-        description.appendText("Request body is ").appendValue(expectedValue);
+        description.appendText("SimpleRequest body is ").appendValue(expectedValue);
     }
 }

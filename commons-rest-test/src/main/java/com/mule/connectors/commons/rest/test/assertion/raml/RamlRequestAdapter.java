@@ -1,6 +1,5 @@
 package com.mule.connectors.commons.rest.test.assertion.raml;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.google.common.base.Optional;
 import com.mule.connectors.commons.rest.builder.request.Request;
 import guru.nidi.ramltester.model.RamlRequest;
@@ -28,7 +27,7 @@ public class RamlRequestAdapter implements RamlRequest {
     @Override
     public String getRequestUrl(String baseUri, boolean includeServletPath) {
         String path = request.getPath();
-        for (Map.Entry<String, Object> pathParam : request.getPathParams().entrySet()) {
+        for (Map.Entry<String, String> pathParam : request.getPathParams().entrySet()) {
             path = path.replace(String.format("${%s}", pathParam.getKey()), Optional.fromNullable(pathParam.getValue()).or("").toString());
         }
         return path;
@@ -36,12 +35,7 @@ public class RamlRequestAdapter implements RamlRequest {
 
     @Override
     public String getMethod() {
-        for (JsonSubTypes.Type type : Request.class.getAnnotation(JsonSubTypes.class).value()) {
-            if (type.value().equals(request.getClass())) {
-                return type.name();
-            }
-        }
-        return null;
+        return String.format("%s", request.getMethod());
     }
 
     @Override

@@ -20,6 +20,6 @@ public class Contains extends ResponseBodyAssertion {
 
     @Override
     public void describeTo(Description description) {
-        description.appendText("Request body containing ").appendValue(expectedValue);
+        description.appendText("SimpleRequest body containing ").appendValue(expectedValue);
     }
 }

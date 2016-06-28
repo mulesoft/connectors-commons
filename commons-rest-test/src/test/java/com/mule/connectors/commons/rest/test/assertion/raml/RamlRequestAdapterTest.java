@@ -1,8 +1,7 @@
 package com.mule.connectors.commons.rest.test.assertion.raml;
 
 import com.google.common.collect.Lists;
-import com.mule.connectors.commons.rest.builder.request.GetRequest;
-import com.mule.connectors.commons.rest.builder.request.Request;
+import com.mule.connectors.commons.rest.builder.request.SimpleRequest;
 import guru.nidi.ramltester.model.Values;
 import org.easymock.EasyMock;
 import org.hamcrest.CoreMatchers;
@@ -14,20 +13,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
+import static com.mule.connectors.commons.rest.builder.request.Method.GET;
+import static org.easymock.EasyMock.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 public class RamlRequestAdapterTest {
 
     private RamlRequestAdapter ramlRequestAdapter;
-    private Request request;
+    private SimpleRequest request;
 
     @Before
     public void setup() {
-        this.request = EasyMock.mock(Request.class);
+        this.request = EasyMock.mock(SimpleRequest.class);
         this.ramlRequestAdapter = new RamlRequestAdapter(request);
     }
 
@@ -35,7 +33,7 @@ public class RamlRequestAdapterTest {
     public void getRequestUrlTest() {
         String path = "this is a path ${variable} ${empty}";
         expect(request.getPath()).andReturn(path);
-        Map<String, Object> pathParams = new TreeMap<>();
+        Map<String, String> pathParams = new TreeMap<>();
         pathParams.put("variable", "variable");
         pathParams.put("empty", null);
         expect(request.getPathParams()).andReturn(pathParams);
@@ -46,14 +44,14 @@ public class RamlRequestAdapterTest {
 
     @Test
     public void getMethodTest() {
-        request = new GetRequest();
+        request = new SimpleRequest(GET);
         ramlRequestAdapter = new RamlRequestAdapter(request);
         assertThat(ramlRequestAdapter.getMethod(), equalTo("GET"));
     }
 
     @Test
     public void getNullMethodTest() {
-        assertThat(ramlRequestAdapter.getMethod(), nullValue());
+        assertThat(ramlRequestAdapter.getMethod(), is("null"));
     }
 
     @Test
@@ -87,7 +85,7 @@ public class RamlRequestAdapterTest {
 
     @Test
     public void addHeaderTest() {
-        Request request = new GetRequest();
+        request = new SimpleRequest(GET);
         request.addHeader("key", "value");
         ramlRequestAdapter = new RamlRequestAdapter(request);
         Map<String, List<Object>> headers = ramlRequestAdapter.getHeaderValues().asMap();
