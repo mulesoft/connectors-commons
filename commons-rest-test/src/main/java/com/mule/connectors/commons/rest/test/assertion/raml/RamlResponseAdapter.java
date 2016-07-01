@@ -1,17 +1,18 @@
 package com.mule.connectors.commons.rest.test.assertion.raml;
 
+import com.google.common.base.Functions;
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import guru.nidi.ramltester.model.RamlResponse;
 import guru.nidi.ramltester.model.Values;
 
+import javax.ws.rs.core.Response;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.core.Response;
-
-import com.google.common.base.Functions;
-import com.google.common.collect.Lists;
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
 
 public class RamlResponseAdapter implements RamlResponse {
 
@@ -26,7 +27,7 @@ public class RamlResponseAdapter implements RamlResponse {
         for (Map.Entry<String, List<Object>> entry : response.getHeaders().entrySet()) {
             headers.put(entry.getKey(), Lists.transform(entry.getValue(), Functions.toStringFunction()).toArray(new String[0]));
         }
-        this.contentType = response.getMediaType().toString();
+        this.contentType = Optional.fromNullable(response.getMediaType()).or(TEXT_PLAIN_TYPE).toString();
         values = new Values(headers);
         content = response.readEntity(String.class);
     }
