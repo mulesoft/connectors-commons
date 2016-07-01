@@ -40,7 +40,7 @@ public enum ResponseStatusExceptionMapper {
         try {
             return exceptionClass.getDeclaredConstructor(Response.class).newInstance(response);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            throw new WebApplicationException(e);
+            throw new WebApplicationException(e, response);
         }
     }
 }
