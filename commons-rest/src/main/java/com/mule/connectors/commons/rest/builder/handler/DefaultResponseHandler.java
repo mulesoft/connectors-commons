@@ -1,18 +1,15 @@
 package com.mule.connectors.commons.rest.builder.handler;
 
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response.Status.Family;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 
 public class DefaultResponseHandler<T> implements ResponseHandler<T> {
@@ -29,11 +26,11 @@ public class DefaultResponseHandler<T> implements ResponseHandler<T> {
             WebApplicationException exception = null;
             try {
                 exception = ResponseStatusExceptionMapper.valueOf(Optional.<Enum<?>>fromNullable(status).or(family).name()).createException(response);
-            } catch (IllegalArgumentException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException unmappedStatusException) {
+            } catch (IllegalArgumentException unmappedStatusException) {
                 try {
                     logger.warn("The response status is not mapped.", unmappedStatusException);
                     exception = ResponseStatusExceptionMapper.valueOf(family.name()).createException(response);
-                } catch (IllegalArgumentException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException unmappedFamilyException) {
+                } catch (IllegalArgumentException unmappedFamilyException) {
                     exception = new WebApplicationException(unmappedFamilyException, response);
                 }
             }

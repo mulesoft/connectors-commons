@@ -45,14 +45,14 @@ public class TestCase {
 
     public void execute(Client client) {
         Map<String, String> placeholderStore = new HashMap<>();
-        for (ParameterizedRequest request : setupAbstractRequestList) {
-            placeholderStore = execute(request, placeholderStore, client, STATUS_MATCHER);
+        for (ParameterizedRequest setupRequest : setupAbstractRequestList) {
+            placeholderStore = execute(setupRequest, placeholderStore, client, STATUS_MATCHER);
         }
         List<Matcher<? super RequestAndResponse>> matchers = new ArrayList<>();
         matchers.addAll(this.assertions);
         placeholderStore = execute(request, placeholderStore, client, allOf(matchers));
-        for (ParameterizedRequest request : tearDownRequestList) {
-            placeholderStore = execute(request, placeholderStore, client, STATUS_MATCHER);
+        for (ParameterizedRequest tearDownRequest : tearDownRequestList) {
+            placeholderStore = execute(tearDownRequest, placeholderStore, client, STATUS_MATCHER);
         }
     }
 
@@ -63,7 +63,7 @@ public class TestCase {
         Map<String, String> result = new HashMap<>();
         String parsedResponse = response.readEntity(String.class);
         for (ResponseTarget responseTarget : request.getResponseTargets()) {
-            result.put(responseTarget.getKey(), responseTarget.match(parsedResponse));
+            result.put(responseTarget.getKey(), Optional.fromNullable(responseTarget.match(parsedResponse)).or(""));
         }
         return result;
     }

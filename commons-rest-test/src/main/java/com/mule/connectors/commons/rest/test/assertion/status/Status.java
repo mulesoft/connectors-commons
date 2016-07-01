@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
  */
 public class Status extends BaseMatcher<RequestAndResponse> implements RequestAndResponseAssertion {
 
-    private static Pattern PATTERN = Pattern.compile("\\d[\\dxX]{2}");
+    private static final Pattern PATTERN = Pattern.compile("\\d[\\dxX]{2}");
     private final String expectedValue;
     private final Matcher<String> matcher;
 
