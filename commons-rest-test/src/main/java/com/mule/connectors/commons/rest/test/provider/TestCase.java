@@ -60,7 +60,7 @@ public class TestCase {
         request.addPlaceHolders(placeholderStore);
         Response response = request.execute(client);
         assertThat(new RequestAndResponse(request, response), matcher);
-        Map<String, String> result = new HashMap<>();
+        Map<String, String> result = new HashMap<>(placeholderStore);
         String parsedResponse = response.readEntity(String.class);
         for (ResponseTarget responseTarget : request.getResponseTargets()) {
             result.put(responseTarget.getKey(), Optional.fromNullable(responseTarget.match(parsedResponse)).or(""));
