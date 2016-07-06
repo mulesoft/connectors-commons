@@ -1,0 +1,36 @@
+{
+    "before" : [{
+        "responseTargets" : [{
+            "key" : "test",
+            "regex" : "a"
+        }],
+        "path" : "http://www.google.com",
+        "queryParams" : {
+            "q" : "Viva Peron Carajo"
+        },
+        "method" :  "GET",
+        "body" : "LOREM IPSUM DOLOR SIT AMET"
+    }],
+    "request" : {
+        "path" : "http://www.google.com/${test}",
+        "queryParams" : {
+            "q" : "Viva Peron Carajo"
+        },
+        "method" :  "GET",
+        "body" : "LOREM IPSUM DOLOR SIT AMET"
+    },
+    "assertions" : [
+        {
+            "type" : "body",
+            "expected" : "Google"
+        },
+        {
+            "type" : "status",
+            "expectedValue" : "4xx"
+        },
+        {
+            "type" : "raml",
+            "file" : "api.raml"
+        }
+    ]
+}
