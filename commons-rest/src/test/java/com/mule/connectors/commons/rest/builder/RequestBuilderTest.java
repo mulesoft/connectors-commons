@@ -124,19 +124,19 @@ public class RequestBuilderTest {
 
     @Test
     public void testGetEntity() {
-        validator.entity = ImmutableMap.builder().put("test", "test").put("test2", "test2");
+        validator.entity = ImmutableMap.builder().put("test", "test").put("test2", "test2").build();
         validator.validateGet();
     }
 
     @Test
     public void testPostEntity() {
-        validator.entity = ImmutableMap.builder().put("test", "test").put("test2", "test2");
+        validator.entity = ImmutableMap.builder().put("test", "test").put("test2", "test2").build();
         validator.validatePost();
     }
 
     @Test
     public void testPutEntity() {
-        validator.entity = ImmutableMap.builder().put("test", "test").put("test2", "test2");
+        validator.entity = ImmutableMap.builder().put("test", "test").put("test2", "test2").build();
         validator.validatePost();
     }
 
