@@ -38,7 +38,7 @@ import static com.mule.connectors.commons.rest.builder.request.Method.*;
  * <ul>
  * <li>Addition of query parameters by using the {@link RequestBuilder#queryParam(String, Object)} or through a {@link MultivaluedMap}.</li>
  * <li>Addition of path parameters by setting them in the path parameter on the static method and assigning them to a placeholder and then setting them using
- * {@link RequestBuilder#pathParam(String, String)}.</li>
+ * {@link RequestBuilder#pathParam(String, Object)}.</li>
  * <li>Setting an entity object to be sent as part of the request using {@link RequestBuilder#entity(Object)} for the object and {@link RequestBuilder#contentType(String)} for the
  * content type (default is APPLICATION_XML).</li>
  * <li>Handling the {@link Response} object using a {@link ResponseHandler}.</li>
@@ -98,8 +98,10 @@ public class RequestBuilder<T> {
         return this;
     }
 
-    public RequestBuilder<T> pathParam(String key, String value) {
-        this.request.addPathParam(key, value);
+    public RequestBuilder<T> pathParam(String key, Object value) {
+        if (Optional.fromNullable(value).isPresent() && StringUtils.isNotEmpty(value.toString())) {
+            this.request.addPathParam(key, value.toString());
+        }
         return this;
     }
 
