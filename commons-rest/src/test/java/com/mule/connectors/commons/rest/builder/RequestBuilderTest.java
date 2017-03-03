@@ -3,7 +3,7 @@ package com.mule.connectors.commons.rest.builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mule.connectors.commons.rest.builder.handler.ResponseHandler;
-import org.apache.commons.lang3.StringUtils;
+import com.mule.connectors.commons.rest.builder.util.SimpleParameterizedType;
 import org.easymock.EasyMock;
 import org.glassfish.hk2.utilities.reflection.ParameterizedTypeImpl;
 import org.junit.Before;
@@ -17,14 +17,22 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.DatatypeConverter;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.easymock.EasyMock.*;
+import static com.google.common.base.Strings.nullToEmpty;
+import static java.lang.Boolean.TRUE;
+import static java.lang.String.format;
+import static javax.ws.rs.core.MediaType.APPLICATION_XML;
+import static javax.xml.bind.DatatypeConverter.printBase64Binary;
+import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
 
 public class RequestBuilderTest {
 
@@ -172,8 +180,8 @@ public class RequestBuilderTest {
             pathParams = new HashMap<>();
             queryParams = new MultivaluedHashMap<>();
             headers = new HashMap<>();
-            contentType = MediaType.APPLICATION_XML;
-            accept = MediaType.APPLICATION_XML;
+            contentType = APPLICATION_XML;
+            accept = APPLICATION_XML;
         }
 
         public void validateGet() {
@@ -207,31 +215,29 @@ public class RequestBuilderTest {
             expect(target.resolveTemplates(eq(Maps.<String, Object>newHashMap(pathParams)))).andReturn(target);
             requestBuilder.queryParams(queryParams);
             for (Map.Entry<String, List<String>> entry : queryParams.entrySet()) {
-                if (entry.getValue() != null && !entry.getValue().isEmpty() && StringUtils.isNotBlank(entry.getValue().get(0))) {
+                if (entry.getValue() != null && !entry.getValue().isEmpty() && !nullToEmpty(entry.getValue().get(0)).isEmpty()) {
                     expect(target.queryParam(eq(entry.getKey()), eq(entry.getValue().get(0)))).andReturn(target);
                 }
             }
             for (Map.Entry<String, Object> entry : headers.entrySet()) {
                 requestBuilder.header(entry.getKey(), entry.getValue());
-                if (entry.getValue() != null && StringUtils.isNotBlank(entry.getValue().toString())) {
+                if (entry.getValue() != null && !nullToEmpty(entry.getValue().toString()).isEmpty()) {
                     expect(invocationBuilder.header(eq(entry.getKey()), eq(entry.getValue()))).andReturn(invocationBuilder);
                 }
             }
             if (username != null || password != null) {
                 requestBuilder.basicAuthorization(username, password);
-                expect(invocationBuilder.header(eq("Authorization"),
-                        eq(String.format("Basic %s", DatatypeConverter.printBase64Binary(String.format("%s:%s", username, password).getBytes()))))).andReturn(
+                expect(invocationBuilder.header(eq("Authorization"), eq(format("Basic %s", printBase64Binary(format("%s:%s", username, password).getBytes()))))).andReturn(
                         invocationBuilder);
             }
             requestBuilder.entity(entity);
             requestBuilder.contentType(contentType);
             requestBuilder.responseType(responseType);
             requestBuilder.responseHandler(responseHandler);
-            expect(responseHandler.handleResponse(eq(response), eq(responseType))).andReturn(null);
-            expect(response.bufferEntity()).andReturn(Boolean.TRUE);
+            expect(responseHandler.handleResponse(eq(response), eq(new SimpleParameterizedType(responseType)))).andReturn(null);
+            expect(response.bufferEntity()).andReturn(TRUE);
             replay(client, target, invocationBuilder, responseHandler, response);
             requestBuilder.execute();
         }
-
     }
 }

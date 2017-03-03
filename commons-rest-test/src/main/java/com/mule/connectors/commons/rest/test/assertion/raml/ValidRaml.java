@@ -8,6 +8,7 @@ import com.mule.connectors.commons.rest.test.assertion.RequestAndResponseAsserti
 import guru.nidi.ramltester.RamlDefinition;
 import guru.nidi.ramltester.RamlLoaders;
 import guru.nidi.ramltester.core.RamlReport;
+import guru.nidi.ramltester.core.RamlViolationMessage;
 import guru.nidi.ramltester.core.RamlViolations;
 import guru.nidi.ramltester.core.Validation;
 import org.hamcrest.BaseMatcher;
@@ -52,9 +53,9 @@ public class ValidRaml extends BaseMatcher<RequestAndResponse> implements Reques
     }
 
     private void addErrors(Description description, RamlViolations errors) {
-        for (String error : errors) {
+        for (RamlViolationMessage error : errors) {
             description.appendText("\n\t\t");
-            description.appendText(error);
+            description.appendText(error.getMessage());
         }
     }
 

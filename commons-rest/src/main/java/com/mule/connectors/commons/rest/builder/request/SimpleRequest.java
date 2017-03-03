@@ -9,11 +9,15 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Form;
+import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_XML;
+import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 
 public class SimpleRequest implements Request {
     private static final Logger logger = LoggerFactory.getLogger(SimpleRequest.class);
@@ -52,8 +56,14 @@ public class SimpleRequest implements Request {
             logger.debug("Header: '{}': {}", entry.getKey(), entry.getValue());
         }
 
+        // FIXME: this is mostly a workaround and should be improved.
+        // Support for body form parameters
+        // Body must be a Form object instead of default LinkedHashMap so as to be picked by the FormProvider (not JacksonJaxbJsonProvider)
+        setEntity((getContentType().equals(APPLICATION_FORM_URLENCODED) || getContentType().equals(MULTIPART_FORM_DATA))
+                && (Optional.fromNullable(getEntity())).isPresent() ? new Form(new MultivaluedHashMap((LinkedHashMap<String, Object>) getEntity())) : new Form());
+
         // Executing the request.
-        Response response = getMethod().execute(requestBuilder, Optional.fromNullable(getEntity()).or(new Form()), getContentType());
+        Response response = getMethod().execute(requestBuilder, getEntity(), getContentType());
         logger.debug("Executed Request with Entity: {}", getEntity());
 
         // Buffer the stream so that we may examine it again later in the case of an error.
@@ -61,6 +71,7 @@ public class SimpleRequest implements Request {
         logger.debug("Response buffered.");
         return response;
     }
+
 
     @Override
     public String getPath() {

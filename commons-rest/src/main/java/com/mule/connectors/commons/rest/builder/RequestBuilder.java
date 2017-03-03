@@ -4,7 +4,7 @@ import com.google.common.base.Optional;
 import com.mule.connectors.commons.rest.builder.handler.DefaultResponseHandler;
 import com.mule.connectors.commons.rest.builder.handler.ResponseHandler;
 import com.mule.connectors.commons.rest.builder.request.SimpleRequest;
-import org.apache.commons.lang3.StringUtils;
+import com.mule.connectors.commons.rest.builder.util.SimpleParameterizedType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +17,11 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map.Entry;
 
-import static com.mule.connectors.commons.rest.builder.request.Method.*;
+import static com.google.common.base.Strings.nullToEmpty;
+import static com.mule.connectors.commons.rest.builder.request.Method.DELETE;
+import static com.mule.connectors.commons.rest.builder.request.Method.GET;
+import static com.mule.connectors.commons.rest.builder.request.Method.POST;
+import static com.mule.connectors.commons.rest.builder.request.Method.PUT;
 
 /**
  * Builder class for http requests.<br>
@@ -62,8 +66,8 @@ public class RequestBuilder<T> {
         this.request.setPath(path);
     }
 
-    public RequestBuilder<T> responseType(Type responseType) {
-        this.responseType = responseType;
+    public RequestBuilder<T> responseType(Type rawType, Type... parameterTypes) {
+        this.responseType = new SimpleParameterizedType(rawType, parameterTypes);
         return this;
     }
 
@@ -73,7 +77,7 @@ public class RequestBuilder<T> {
     }
 
     public RequestBuilder<T> header(String key, Object value) {
-        if (Optional.fromNullable(value).isPresent() && StringUtils.isNotEmpty(value.toString())) {
+        if (Optional.fromNullable(value).isPresent() && !nullToEmpty(value.toString()).isEmpty()) {
             this.request.addHeader(key, value.toString());
         }
         return this;
@@ -85,7 +89,7 @@ public class RequestBuilder<T> {
     }
 
     public RequestBuilder<T> queryParam(String key, Object value) {
-        if (Optional.fromNullable(value).isPresent() && StringUtils.isNotEmpty(value.toString())) {
+        if (Optional.fromNullable(value).isPresent() && !nullToEmpty(value.toString()).isEmpty()) {
             this.request.addQueryParam(key, value.toString());
         }
         return this;

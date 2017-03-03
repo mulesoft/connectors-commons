@@ -73,13 +73,12 @@ public class ParameterizedRequest extends SimpleRequest {
             output.put(entry.getKey(), resolvePlaceholders(entry.getValue().toString()));
         }
         return output;
-
     }
 
     private String resolvePlaceholders(String input) {
         String output = input;
         for (Map.Entry<String, String> entry : placeholderStore.entrySet()) {
-            output = input.replace(String.format("${%s}", entry.getKey()), entry.getValue());
+            output = output.replace(String.format("${%s}", entry.getKey()), entry.getValue());
         }
         return output;
     }
