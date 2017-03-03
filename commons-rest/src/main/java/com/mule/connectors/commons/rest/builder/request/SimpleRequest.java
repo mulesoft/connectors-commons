@@ -1,6 +1,5 @@
 package com.mule.connectors.commons.rest.builder.request;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,24 +8,21 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Form;
-import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_XML;
-import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 
 public class SimpleRequest implements Request {
+
     private static final Logger logger = LoggerFactory.getLogger(SimpleRequest.class);
     private final Method method;
     private String path;
     private Map<String, String> headers = new HashMap<>();
     private Map<String, String> queryParams = new HashMap<>();
     private Map<String, String> pathParams = new HashMap<>();
-    private Object entity;
+    private Object entity = new Form();
     private String contentType = APPLICATION_XML;
     private String accept = APPLICATION_XML;
 
@@ -56,12 +52,6 @@ public class SimpleRequest implements Request {
             logger.debug("Header: '{}': {}", entry.getKey(), entry.getValue());
         }
 
-        // FIXME: this is mostly a workaround and should be improved.
-        // Support for body form parameters
-        // Body must be a Form object instead of default LinkedHashMap so as to be picked by the FormProvider (not JacksonJaxbJsonProvider)
-        setEntity((getContentType().equals(APPLICATION_FORM_URLENCODED) || getContentType().equals(MULTIPART_FORM_DATA))
-                && (Optional.fromNullable(getEntity())).isPresent() ? new Form(new MultivaluedHashMap((LinkedHashMap<String, Object>) getEntity())) : new Form());
-
         // Executing the request.
         Response response = getMethod().execute(requestBuilder, getEntity(), getContentType());
         logger.debug("Executed Request with Entity: {}", getEntity());
@@ -71,7 +61,6 @@ public class SimpleRequest implements Request {
         logger.debug("Response buffered.");
         return response;
     }
-
 
     @Override
     public String getPath() {

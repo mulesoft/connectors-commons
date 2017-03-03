@@ -11,6 +11,8 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response.Status.Family;
 import java.lang.reflect.Type;
 
+import static javax.ws.rs.core.Response.Status.Family.SUCCESSFUL;
+
 public class DefaultResponseHandler<T> implements ResponseHandler<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultResponseHandler.class);
@@ -21,7 +23,7 @@ public class DefaultResponseHandler<T> implements ResponseHandler<T> {
         Family family = response.getStatusInfo().getFamily();
         logger.debug("Response Status is {}", status);
         logger.trace("Response body:\n{}", response.readEntity(String.class));
-        if (Family.SUCCESSFUL != family) {
+        if (SUCCESSFUL != family) {
             throw new RequestFailedException(response);
         }
 

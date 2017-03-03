@@ -29,7 +29,7 @@ public class TestCase {
     private static final Status STATUS_MATCHER = new Status("2xx");
     private final ParameterizedRequest request;
     private final List<RequestAndResponseAssertion> assertions;
-    private final List<ParameterizedRequest> setupAbstractRequestList;
+    private final List<ParameterizedRequest> setupRequestList;
     private final List<ParameterizedRequest> tearDownRequestList;
 
     @JsonCreator
@@ -37,7 +37,7 @@ public class TestCase {
             @JsonProperty(value = "request", required = true) ParameterizedRequest request,
             @JsonProperty(value = "after", required = true) List<ParameterizedRequest> tearDownRequestList,
             @JsonProperty(value = "assertions", required = true) List<RequestAndResponseAssertion> assertions) {
-        this.setupAbstractRequestList = Optional.fromNullable(setupAbstractRequestList).or(Collections.<ParameterizedRequest>emptyList());
+        this.setupRequestList = Optional.fromNullable(setupAbstractRequestList).or(Collections.<ParameterizedRequest>emptyList());
         this.request = request;
         this.tearDownRequestList = Optional.fromNullable(tearDownRequestList).or(Collections.<ParameterizedRequest>emptyList());
         this.assertions = Optional.fromNullable(assertions).or(Collections.<RequestAndResponseAssertion>emptyList());
@@ -45,7 +45,7 @@ public class TestCase {
 
     public void execute(Client client) {
         Map<String, String> placeholderStore = new HashMap<>();
-        for (ParameterizedRequest setupRequest : setupAbstractRequestList) {
+        for (ParameterizedRequest setupRequest : setupRequestList) {
             placeholderStore = execute(setupRequest, placeholderStore, client, STATUS_MATCHER);
         }
         List<Matcher<? super RequestAndResponse>> matchers = new ArrayList<>();

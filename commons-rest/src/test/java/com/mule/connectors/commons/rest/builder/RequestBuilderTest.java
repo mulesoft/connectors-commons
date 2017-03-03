@@ -1,8 +1,8 @@
 package com.mule.connectors.commons.rest.builder;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.mule.connectors.commons.rest.builder.handler.ResponseHandler;
+import com.mule.connectors.commons.rest.builder.listener.RequestListener;
 import com.mule.connectors.commons.rest.builder.util.SimpleParameterizedType;
 import org.easymock.EasyMock;
 import org.glassfish.hk2.utilities.reflection.ParameterizedTypeImpl;
@@ -71,7 +71,10 @@ public class RequestBuilderTest {
 
     @Test
     public void testDifferentPathParams() {
-        validator.pathParams = ImmutableMap.<String, String>builder().put("test", "test").put("test2", "test2").build();
+        validator.pathParams.put("test", "test");
+        validator.pathParams.put("test2", "test2");
+        validator.pathParams.put("test3", null);
+        validator.pathParams.put("test4", "");
         validator.validateGet();
     }
 
@@ -148,9 +151,16 @@ public class RequestBuilderTest {
         validator.validatePost();
     }
 
-    private final class Validator {
+    @Test
+    public void testRequestListener() {
+        validator.entity = ImmutableMap.builder().put("test", "test").put("test2", "test2").build();
+        validator.listeners = new RequestListener[] { new DummyRequestListener() };
+        validator.validatePost();
+    }
 
+    private final class Validator {
         private static final String DEFAULT_PATH = "/default";
+        private RequestListener[] listeners = new RequestListener[] {};
         private Invocation.Builder invocationBuilder;
         private WebTarget target;
         private Client client;
@@ -212,7 +222,7 @@ public class RequestBuilderTest {
             for (Map.Entry<String, String> entry : pathParams.entrySet()) {
                 requestBuilder.pathParam(entry.getKey(), entry.getValue());
             }
-            expect(target.resolveTemplates(eq(Maps.<String, Object>newHashMap(pathParams)))).andReturn(target);
+            expect(target.resolveTemplates(anyObject(Map.class))).andReturn(target);
             requestBuilder.queryParams(queryParams);
             for (Map.Entry<String, List<String>> entry : queryParams.entrySet()) {
                 if (entry.getValue() != null && !entry.getValue().isEmpty() && !nullToEmpty(entry.getValue().get(0)).isEmpty()) {
@@ -234,6 +244,7 @@ public class RequestBuilderTest {
             requestBuilder.contentType(contentType);
             requestBuilder.responseType(responseType);
             requestBuilder.responseHandler(responseHandler);
+            requestBuilder.onBeforeRequest(listeners);
             expect(responseHandler.handleResponse(eq(response), eq(new SimpleParameterizedType(responseType)))).andReturn(null);
             expect(response.bufferEntity()).andReturn(TRUE);
             replay(client, target, invocationBuilder, responseHandler, response);

@@ -73,6 +73,11 @@ public class SimpleParameterizedTypeTest {
     }
 
     @Test
+    public void differentTypeTest() {
+        assertDifferent(new SimpleParameterizedType(List.class), List.class);
+    }
+
+    @Test
     public void getOwnerTest() {
         assertThat(new SimpleParameterizedType(List.class).getOwnerType(), CoreMatchers.<Type>equalTo(List.class));
     }

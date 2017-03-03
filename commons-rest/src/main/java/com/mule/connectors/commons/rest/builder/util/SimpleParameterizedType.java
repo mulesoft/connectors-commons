@@ -35,25 +35,15 @@ public class SimpleParameterizedType implements ParameterizedType {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (!(o instanceof SimpleParameterizedType))
-            return false;
-
-        SimpleParameterizedType that = (SimpleParameterizedType) o;
-
-        if (!getRawType().equals(that.getRawType()))
-            return false;
-        // Probably incorrect - comparing Object[] arrays with Arrays.equals
-        return Arrays.equals(getActualTypeArguments(), that.getActualTypeArguments());
-
+    public boolean equals(Object other) {
+        return (this == other) ||
+                (other instanceof SimpleParameterizedType &&
+                        getRawType().equals(SimpleParameterizedType.class.cast(other).getRawType()) &&
+                        Arrays.equals(getActualTypeArguments(), SimpleParameterizedType.class.cast(other).getActualTypeArguments()));
     }
 
     @Override
     public int hashCode() {
-        int result = getRawType().hashCode();
-        result = 31 * result + Arrays.hashCode(getActualTypeArguments());
-        return result;
+        return 31 * getRawType().hashCode() + Arrays.hashCode(getActualTypeArguments());
     }
 }
