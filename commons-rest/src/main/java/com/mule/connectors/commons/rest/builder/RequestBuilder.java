@@ -1,6 +1,7 @@
 package com.mule.connectors.commons.rest.builder;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.mule.connectors.commons.rest.builder.handler.DefaultResponseHandler;
 import com.mule.connectors.commons.rest.builder.handler.ResponseHandler;
 import com.mule.connectors.commons.rest.builder.request.SimpleRequest;
@@ -46,6 +47,7 @@ import static com.mule.connectors.commons.rest.builder.request.Method.PUT;
  * <li>Setting an entity object to be sent as part of the request using {@link RequestBuilder#entity(Object)} for the object and {@link RequestBuilder#contentType(String)} for the
  * content type (default is APPLICATION_XML).</li>
  * <li>Handling the {@link Response} object using a {@link ResponseHandler}.</li>
+ * <li>Setting the response type of the request by using the {@link RequestBuilder#responseType(Type, Type...)} </li>
  * <li>Setting headers using {@link RequestBuilder#header(String, Object)}.</li>
  * </ul>
  *
@@ -103,7 +105,7 @@ public class RequestBuilder<T> {
     }
 
     public RequestBuilder<T> pathParam(String key, Object value) {
-        if (Optional.fromNullable(value).isPresent() && StringUtils.isNotEmpty(value.toString())) {
+        if (Optional.fromNullable(value).isPresent() && !Strings.nullToEmpty(value.toString()).isEmpty()) {
             this.request.addPathParam(key, value.toString());
         }
         return this;
