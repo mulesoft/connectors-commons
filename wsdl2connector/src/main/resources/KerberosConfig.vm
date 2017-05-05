@@ -1,0 +1,89 @@
+package ${basePackage};
+
+import javax.xml.ws.BindingProvider;
+import org.mule.api.annotations.Configurable;
+import org.apache.cxf.Bus;
+import org.apache.cxf.endpoint.Client;
+import org.apache.cxf.endpoint.EndpointImpl;
+import org.apache.cxf.frontend.ClientProxy;
+import org.apache.cxf.interceptor.security.NamePasswordCallbackHandler;
+import org.apache.ws.security.handler.WSHandlerConstants;
+import org.mule.api.annotations.display.Placement;
+import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
+import org.mule.api.annotations.components.ConnectionManagement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ${clientClassPackage}.${clientClass};
+import ${serviceClassPackage}.${serviceClass};
+
+@ConnectionManagement(configElementName="kerberos-connection-config", friendlyName="Kerberos Connection")
+public class KerberosConfig extends BaseConfig<${clientClass}> {
+
+    private static final Logger logger = LoggerFactory.getLogger(KerberosConfig.class);
+
+    @Configurable
+    @Placement(order = 3)
+    private String spn;
+    @Configurable
+    @Placement(order = 4)
+    private String loginConfLocation;
+    @Configurable
+    @Placement(order = 5)
+    private String krb5ConfLocation;
+
+    public ${clientClass} createClient(String username, String password) {
+        logger.info("Setting system properties.");
+        System.setProperty("java.security.auth.login.config", loginConfLocation);
+        System.setProperty("java.security.krb5.conf", krb5ConfLocation);
+
+        logger.info("Retrieving webservice client.");
+        ${clientClass} wsClient = new ${serviceClass}().${clientRetrievalMethod}();
+        Client client = ClientProxy.getClient(wsClient);
+
+        logger.info("Configuring bus.");
+        Bus bus = ((EndpointImpl) client.getEndpoint()).getBus();
+        bus.getProperties().put("soap.no.validate.parts", true);
+
+        logger.info("Configuring request context with Kerberos configuration.");
+        client.getRequestContext().put(WSHandlerConstants.IS_BSP_COMPLIANT, "false");
+        client.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, getEndpoint());
+        client.getRequestContext().put("ws-security.kerberos.jaas.context", "spnego-client");
+        client.getRequestContext().put("ws-security.kerberos.spn", spn);
+        client.getRequestContext().put("ws-security.spnego.client.action", new XRMSpnegoClientAction());
+        client.getRequestContext().put("ws-security.callback-handler", new NamePasswordCallbackHandler(username, password));
+        client.getRequestContext().put("set-jaxb-validation-event-handler", "false");
+
+        logger.info("Connection ready.");
+        return wsClient;
+    }
+
+    public String getLoginConfLocation() {
+        return loginConfLocation;
+    }
+
+    public void setLoginConfLocation(String loginConfLocation) {
+        this.loginConfLocation = loginConfLocation;
+    }
+
+    public String getKrb5ConfLocation() {
+        return krb5ConfLocation;
+    }
+
+    public void setKrb5ConfLocation(String krb5ConfLocation) {
+        this.krb5ConfLocation = krb5ConfLocation;
+    }
+
+    public String getSpn() {
+        return spn;
+    }
+
+    public void setSpn(String spn) {
+        this.spn = spn;
+    }
+
+    @Override
+    public String getParamsPackage() {
+        return "kerberos";
+    }
+}

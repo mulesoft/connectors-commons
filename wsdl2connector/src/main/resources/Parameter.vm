@@ -1,0 +1,26 @@
+package ${basePackage};
+
+#foreach($clazz in ${classes})
+import ${clazz.name};
+#end
+
+
+public class $StringUtils.capitalize($methodName)Param {
+
+#foreach($clazz in ${classes})
+    private ${clazz.simpleName} value${foreach.count}${clazz.simpleName};
+#end
+
+#foreach($clazz in ${classes})
+    #set ($name = "${foreach.count}${clazz.simpleName}")
+    public ${clazz.simpleName} getValue${name}() {
+        return value${name};
+    }
+
+    public void setValue${name}(${clazz.simpleName} value${name}) {
+        this.value${name} = value${name};
+    }
+
+#end
+
+}

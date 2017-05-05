@@ -1,0 +1,66 @@
+package ${basePackage};
+
+import org.mule.api.annotations.Configurable;
+import org.mule.api.annotations.Connect;
+import org.mule.api.annotations.ConnectStrategy;
+import org.mule.api.annotations.ConnectionIdentifier;
+import org.mule.api.annotations.Disconnect;
+import org.mule.api.annotations.TestConnectivity;
+import org.mule.api.annotations.ValidateConnection;
+import org.mule.api.annotations.display.Password;
+import org.mule.api.annotations.param.ConnectionKey;
+import org.mule.api.annotations.display.Placement;
+import org.mule.api.ConnectionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public abstract class BaseConfig<T> {
+
+    private static final Logger logger = LoggerFactory.getLogger(BaseConfig.class);
+
+    private T client;
+
+    @Configurable
+    @Placement(order = 2)
+    private String endpoint;
+
+    @Connect(strategy = ConnectStrategy.SINGLE_INSTANCE)
+    @TestConnectivity(label = "Validate configuration...")
+    public void connect(@ConnectionKey String username, @Password String password) throws ConnectionException {
+        logger.info("Creating connection for username {}", username);
+        client = createClient(username, password);
+        logger.info("Connection creation successful.");
+    }
+
+    @Disconnect
+    public void disconnect() {
+        logger.info("Disconnecting.");
+        client = null;
+    }
+
+    @ConnectionIdentifier
+    public String getConnectionIdentifier() {
+        return client.toString();
+    }
+
+    @ValidateConnection
+    public boolean validateConnection() {
+        return client != null;
+    }
+
+    public abstract T createClient(String username, String password);
+
+    public abstract String getParamsPackage();
+
+    public T getClient() {
+        return client;
+    }
+
+    public String getEndpoint() {
+        return endpoint;
+    }
+
+    public void setEndpoint(String endpoint) {
+        this.endpoint = endpoint;
+    }
+}
