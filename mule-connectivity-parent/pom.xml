@@ -16,7 +16,7 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>org.mule.connectors</groupId>
+            <groupId>com.mule.connectors</groupId>
             <artifactId>connector-commons</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
