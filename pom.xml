@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.mule.connectors</groupId>
-    <artifactId>commons</artifactId>
+    <artifactId>connectivity-commons</artifactId>
     <packaging>pom</packaging>
     <version>1.1.2-SNAPSHOT</version>
     <name>Connectors Commons Parent</name>
@@ -10,6 +10,8 @@
         <module>commons-rest</module>
         <module>commons-rest-test</module>
         <module>mule-connectors-maven-plugin</module>
+        <module>mule-connectivity-parent</module>
+        <module>connector-commons</module>
     </modules>
 
     <properties>

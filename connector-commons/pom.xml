@@ -1,0 +1,80 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.mule.connectors</groupId>
+    <artifactId>connector-commons</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>Common Connectors Library</name>
+    <properties>
+        <jdk.version>1.8</jdk.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.easymock</groupId>
+            <artifactId>easymock</artifactId>
+            <version>3.5</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.25</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mule.connectors</groupId>
+            <artifactId>atlantic-commons</artifactId>
+            <version>0.9.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mule.runtime</groupId>
+            <artifactId>mule-api</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+    <repositories>
+        <repository>
+            <id>mulesoft-releases</id>
+            <name>Mulesoft Release Repository</name>
+            <url>https://repository-master.mulesoft.org/nexus/content/repositories/releases</url>
+        </repository>
+        <repository>
+            <id>exchange-maven-facade-prod</id>
+            <name>MuleSoft Exchange Productive Environment</name>
+            <url>https://maven.anypoint.mulesoft.com/api/v1/organizations/68ef9520-24e9-4cf2-b2f5-620025690913/maven
+            </url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>mulesoft-plugin-releases</id>
+            <name>MuleSoft Release Repository</name>
+            <url>http://repository.mulesoft.org/releases/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+            <id>mulesoft-plugin-snapshots</id>
+            <name>MuleSoft Snapshot Repository</name>
+            <url>http://repository.mulesoft.org/snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+</project>

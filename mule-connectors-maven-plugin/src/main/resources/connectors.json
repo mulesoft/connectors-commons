@@ -60,10 +60,9 @@
       "location" : "git@github.com:mulesoft/s3-connector.git"
     },
     {
-      "name" : "bmc-remedy",
+      "name" : "remedy",
       "description" : "BMC Remedy",
-      "location" : ""
-
+      "location" : "git@github.com:mulesoft/remedy-connector.git"
     },
     {
       "name" : "box",
@@ -260,10 +259,10 @@
 
     },
     {
-      "name" : "",
+      "name" : "rosetta-net",
       "description" : "RosettaNet",
-      "location" : ""
-      
+      "location" : "git@github.com:mulesoft/rosetta-net-connector.git"
+
     },
     {
       "name" : "concur",
