@@ -1,9 +1,10 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.mule.extensions</groupId>
         <artifactId>mule-modules-parent</artifactId>
-        <version>1.0.0-greenarrow</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
     <groupId>com.mule.connectors</groupId>
     <artifactId>mule-connectivity-parent</artifactId>
@@ -13,8 +14,6 @@
     <properties>
         <jdk.version>1.8</jdk.version>
     </properties>
-    <build>
-    </build>
     <dependencies>
         <dependency>
             <groupId>org.mule.connectors</groupId>
@@ -22,6 +21,7 @@
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
+
     <repositories>
         <repository>
             <id>mulesoft-releases</id>
@@ -31,7 +31,17 @@
         <repository>
             <id>exchange-maven-facade-prod</id>
             <name>MuleSoft Exchange Productive Environment</name>
-            <url>https://maven.anypoint.mulesoft.com/api/v1/organizations/68ef9520-24e9-4cf2-b2f5-620025690913/maven</url>
+            <url>
+                https://maven.anypoint.mulesoft.com/api/v1/organizations/68ef9520-24e9-4cf2-b2f5-620025690913/maven
+            </url>
+        </repository>
+        <repository>
+            <id>maven-facade-qax</id>
+            <name>Mozart QA Environment</name>
+            <url>
+                https://maven.qax.anypoint.mulesoft.com/api/v1/organizations/68ef9520-24e9-4cf2-b2f5-620025690913/maven
+            </url>
+            <layout>default</layout>
         </repository>
     </repositories>
 
@@ -59,4 +69,66 @@
             </snapshots>
         </pluginRepository>
     </pluginRepositories>
+    <profiles>
+        <profile>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <id>deploy-devx-maven-facade</id>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>maven-facade-devx</id>
+                    <name>Mozart Dev Environment</name>
+                    <url>
+                        https://maven.devx.anypoint.mulesoft.com/api/v1/organizations/68ef9520-24e9-4cf2-b2f5-620025690913/maven
+                    </url>
+                </snapshotRepository>
+            </distributionManagement>
+        </profile>
+        <profile>
+            <id>deploy-qax-maven-facade</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>maven-facade-qax</id>
+                    <name>Mozart QA Environment</name>
+                    <url>
+                        https://maven.qax.anypoint.mulesoft.com/api/v1/organizations/68ef9520-24e9-4cf2-b2f5-620025690913/maven
+                    </url>
+                </snapshotRepository>
+            </distributionManagement>
+        </profile>
+        <profile>
+            <id>deploy-stgx-maven-facade</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>maven-facade-stgx</id>
+                    <name>Mozart STGX Environment</name>
+                    <url>
+                        https://maven.stgx.anypoint.mulesoft.com/api/v1/organizations/68ef9520-24e9-4cf2-b2f5-620025690913/maven
+                    </url>
+                </snapshotRepository>
+            </distributionManagement>
+        </profile>
+        <profile>
+            <id>deploy-prod-maven-facade</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>maven-facade-prod</id>
+                    <name>Mozart Productive Environment</name>
+                    <url>
+                        https://maven.anypoint.mulesoft.com/api/v1/organizations/68ef9520-24e9-4cf2-b2f5-620025690913/maven
+                    </url>
+                </snapshotRepository>
+            </distributionManagement>
+        </profile>
+    </profiles>
 </project>
