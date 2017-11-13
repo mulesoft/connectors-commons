@@ -30,12 +30,12 @@
         <dependency>
             <groupId>org.mule.connectors</groupId>
             <artifactId>atlantic-commons</artifactId>
-            <version>0.9.1-SNAPSHOT</version>
+            <version>0.9.1</version>
         </dependency>
         <dependency>
             <groupId>org.mule.runtime</groupId>
             <artifactId>mule-api</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -78,6 +78,24 @@
         </pluginRepository>
     </pluginRepositories>
     <profiles>
+        <profile>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <id>public-repo</id>
+            <distributionManagement>
+                <repository>
+                    <id>mulesoft-public</id>
+                    <name>Mozart Public Environment</name>
+                    <url>https://repository.mulesoft.org/nexus/content/groups/public/</url>
+                </repository>
+                <snapshotRepository>
+                    <id>mulesoft-public-snapshots</id>
+                    <name>Mozart Public Snapshot Environment</name>
+                    <url>https://repository.mulesoft.org/nexus/content/groups/public-snapshots/</url>
+                </snapshotRepository>
+            </distributionManagement>
+        </profile>
         <profile>
             <activation>
                 <activeByDefault>false</activeByDefault>
