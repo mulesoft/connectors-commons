@@ -10,8 +10,6 @@
         <module>commons-rest</module>
         <module>commons-rest-test</module>
         <module>mule-connectors-maven-plugin</module>
-        <module>mule-connectivity-parent</module>
-        <module>connector-commons</module>
     </modules>
 
     <properties>
