@@ -64,6 +64,11 @@ public class RequestBuilderTest {
     }
 
     @Test
+    public void testSimplePatchExecute() {
+        validator.validatePatch();
+    }
+
+    @Test
     public void testDifferentPath() {
         validator.path = "/root";
         validator.validateGet();
@@ -152,6 +157,12 @@ public class RequestBuilderTest {
     }
 
     @Test
+    public void testPatchEntity() {
+        validator.entity = ImmutableMap.builder().put("test", "test").put("test2", "test2").build();
+        validator.validatePatch();
+    }
+
+    @Test
     public void testRequestListener() {
         validator.entity = ImmutableMap.builder().put("test", "test").put("test2", "test2").build();
         validator.listeners = new RequestListener[] { new DummyRequestListener() };
@@ -212,6 +223,11 @@ public class RequestBuilderTest {
         public void validateDelete() {
             expect(invocationBuilder.delete()).andReturn(response);
             validate(RequestBuilder.delete(client, path));
+        }
+
+        public void validatePatch() {
+            expect(invocationBuilder.method(EasyMock.endsWith("PATCH"), EasyMock.anyObject(Entity.class))).andReturn(response);
+            validate(RequestBuilder.patch(client, path));
         }
 
         private void validate(RequestBuilder requestBuilder) {
