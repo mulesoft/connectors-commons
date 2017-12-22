@@ -3,7 +3,7 @@
     <groupId>com.mule.connectors</groupId>
     <artifactId>commons</artifactId>
     <packaging>pom</packaging>
-    <version>1.1.3-SNAPSHOT</version>
+    <version>1.1.3</version>
     <name>Connectors Commons Parent</name>
 
     <modules>
@@ -147,6 +147,6 @@
         <connection>scm:git:git://github.com:mulesoft/connectors-commons.git</connection>
         <developerConnection>scm:git:git@github.com:mulesoft/connectors-commons.git</developerConnection>
         <url>https://github.com/mulesoft/connectors-commons</url>
-      <tag>HEAD</tag>
+      <tag>commons-1.1.3</tag>
     </scm>
 </project>
