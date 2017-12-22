@@ -28,6 +28,12 @@ public enum Method {
         public Response execute(Invocation.Builder requestBuilder, Object entity, String contentType) {
             return requestBuilder.delete();
         }
+    },
+    PATCH {
+        @Override
+        public Response execute(Invocation.Builder requestBuilder, Object entity, String contentType) {
+            return requestBuilder.method("PATCH", Entity.entity(entity, contentType));
+        }
     };
 
     public abstract Response execute(Invocation.Builder requestBuilder, Object entity, String contentType);

@@ -21,10 +21,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import static com.google.common.base.Strings.nullToEmpty;
-import static com.mule.connectors.commons.rest.builder.request.Method.DELETE;
-import static com.mule.connectors.commons.rest.builder.request.Method.GET;
-import static com.mule.connectors.commons.rest.builder.request.Method.POST;
-import static com.mule.connectors.commons.rest.builder.request.Method.PUT;
+import static com.mule.connectors.commons.rest.builder.request.Method.*;
 import static java.util.Arrays.asList;
 
 /**
@@ -159,5 +156,9 @@ public class RequestBuilder<T> {
 
     public static <T> RequestBuilder<T> delete(Client client, String path) {
         return new RequestBuilder<>(client, new SimpleRequest(DELETE), path);
+    }
+
+    public static <T> RequestBuilder<T> patch(Client client, String path) {
+        return new RequestBuilder<>(client, new SimpleRequest(PATCH), path);
     }
 }
