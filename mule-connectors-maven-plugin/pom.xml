@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.mule.connectors.commons</groupId>
     <artifactId>mule-connectors-maven-plugin</artifactId>
-    <version>1</version>
+    <version>2-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
     <name>Mule Connectors Maven Plugin</name>
     <properties>
