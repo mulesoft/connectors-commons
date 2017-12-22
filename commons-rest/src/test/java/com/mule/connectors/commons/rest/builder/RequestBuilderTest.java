@@ -69,6 +69,16 @@ public class RequestBuilderTest {
     }
 
     @Test
+    public void testSimpleHeadExecute() {
+        validator.validateHead();
+    }
+
+    @Test
+    public void testSimpleOptionsExecute() {
+        validator.validateOptions();
+    }
+
+    @Test
     public void testDifferentPath() {
         validator.path = "/root";
         validator.validateGet();
@@ -228,6 +238,16 @@ public class RequestBuilderTest {
         public void validatePatch() {
             expect(invocationBuilder.method(EasyMock.endsWith("PATCH"), EasyMock.anyObject(Entity.class))).andReturn(response);
             validate(RequestBuilder.patch(client, path));
+        }
+
+        public void validateHead() {
+            expect(invocationBuilder.head()).andReturn(response);
+            validate(RequestBuilder.head(client, path));
+        }
+
+        public void validateOptions() {
+            expect(invocationBuilder.options()).andReturn(response);
+            validate(RequestBuilder.options(client, path));
         }
 
         private void validate(RequestBuilder requestBuilder) {

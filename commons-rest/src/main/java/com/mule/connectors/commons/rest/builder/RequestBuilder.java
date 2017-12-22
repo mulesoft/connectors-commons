@@ -161,4 +161,12 @@ public class RequestBuilder<T> {
     public static <T> RequestBuilder<T> patch(Client client, String path) {
         return new RequestBuilder<>(client, new SimpleRequest(PATCH), path);
     }
+
+    public static <T> RequestBuilder<T> head(Client client, String path) {
+        return new RequestBuilder<>(client, new SimpleRequest(HEAD), path);
+    }
+
+    public static <T> RequestBuilder<T> options(Client client, String path) {
+        return new RequestBuilder<>(client, new SimpleRequest(OPTIONS), path);
+    }
 }
