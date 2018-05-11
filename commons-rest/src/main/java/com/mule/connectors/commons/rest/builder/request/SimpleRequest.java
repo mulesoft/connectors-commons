@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
+import org.glassfish.jersey.media.multipart.BodyPart;
+import org.glassfish.jersey.media.multipart.MultiPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,9 +62,9 @@ public class SimpleRequest implements Request {
             logger.debug("Header: '{}': {}", entry.getKey(), entry.getValue());
         }
 
-        if((getContentType().equals(APPLICATION_FORM_URLENCODED) || getContentType().equals(MULTIPART_FORM_DATA))
-                && (Optional.fromNullable(getEntity())).isPresent())
+        if(getContentType().equals(APPLICATION_FORM_URLENCODED) && (Optional.fromNullable(getEntity())).isPresent()){
             setEntity(new Form(new MultivaluedHashMap(objectMapper.convertValue(getEntity(), Map.class))));
+        }
 
         // Executing the request.
         Response response = getMethod().execute(requestBuilder, getEntity(), getContentType());
