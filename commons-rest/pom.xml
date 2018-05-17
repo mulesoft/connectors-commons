@@ -3,7 +3,7 @@
     <parent>
         <groupId>com.mule.connectors</groupId>
         <artifactId>connectivity-commons</artifactId>
-        <version>1.2.1</version>
+        <version>1.2.2-SNAPSHOT</version>
     </parent>
     <groupId>com.mule.connectors.commons</groupId>
     <artifactId>commons-rest</artifactId>
