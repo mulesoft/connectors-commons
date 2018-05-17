@@ -18,7 +18,6 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_XML;
-import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 
 public class SimpleRequest implements Request {
 
@@ -60,9 +59,9 @@ public class SimpleRequest implements Request {
             logger.debug("Header: '{}': {}", entry.getKey(), entry.getValue());
         }
 
-        if((getContentType().equals(APPLICATION_FORM_URLENCODED) || getContentType().equals(MULTIPART_FORM_DATA))
-                && (Optional.fromNullable(getEntity())).isPresent())
+        if(getContentType().equals(APPLICATION_FORM_URLENCODED) && (Optional.fromNullable(getEntity())).isPresent()){
             setEntity(new Form(new MultivaluedHashMap(objectMapper.convertValue(getEntity(), Map.class))));
+        }
 
         // Executing the request.
         Response response = getMethod().execute(requestBuilder, getEntity(), getContentType());
