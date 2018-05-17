@@ -9,7 +9,6 @@
     <modules>
         <module>commons-rest</module>
         <module>commons-rest-test</module>
-        <module>mule-connectors-maven-plugin</module>
     </modules>
 
     <properties>
