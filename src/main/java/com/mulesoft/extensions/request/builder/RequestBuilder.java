@@ -32,7 +32,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import static com.mulesoft.extensions.request.builder.request.Method.DELETE;
 import static com.mulesoft.extensions.request.builder.request.Method.GET;
@@ -257,7 +260,7 @@ public class RequestBuilder<T> extends HttpMessageBuilder<RequestBuilder<T>, Htt
     }
 
     public static RequestBuilder<String> head(HttpClient client, String path) {
-        return new RequestBuilder<>(client, HEAD, path, new DefaultResponseHandler());
+        return head(client, path, new DefaultResponseHandler());
     }
 
     public static <T> RequestBuilder<T> options(HttpClient client, String path, ResponseHandler<T> responseHandler) {
@@ -265,7 +268,7 @@ public class RequestBuilder<T> extends HttpMessageBuilder<RequestBuilder<T>, Htt
     }
 
     public static RequestBuilder<String> options(HttpClient client, String path) {
-        return new RequestBuilder<>(client, OPTIONS, path, new DefaultResponseHandler());
+        return options(client, path, new DefaultResponseHandler());
     }
 
     @Override
@@ -283,5 +286,17 @@ public class RequestBuilder<T> extends HttpMessageBuilder<RequestBuilder<T>, Htt
         HttpResponse response = client.send(build(), timeout, followRedirects, authentication);
         logger.debug("Parsing response.");
         return responseHandler.handleResponse(response);
+    }
+
+    public void execute(Consumer<T> onComplete) {
+        SimpleRequest request = build();
+        for (RequestListener listener : requestListeners) {
+            logger.debug("Request Listener {} found. Providing request.", listener.getClass());
+            listener.handle(request);
+        }
+        this.client.sendAsync(request, timeout, followRedirects, authentication).whenCompleteAsync((response, throwable) -> {
+            logger.debug("Parsing response.");
+            onComplete.accept(responseHandler.handleResponse(response));
+        });
     }
 }
