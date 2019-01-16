@@ -2,14 +2,13 @@ package com.mulesoft.extensions.request.builder;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mulesoft.extensions.request.builder.exception.RequestEntityParsingException;
-import com.mulesoft.extensions.request.builder.exception.RequestFailedException;
-import com.mulesoft.extensions.request.builder.exception.ResponseEntityParsingException;
+import com.mulesoft.extensions.request.builder.exception.*;
 import com.mulesoft.extensions.request.builder.handler.DefaultResponseHandler;
 import com.mulesoft.extensions.request.builder.handler.JacksonResponseHandler;
 import com.mulesoft.extensions.request.builder.handler.ResponseHandler;
 import com.mulesoft.extensions.request.builder.listener.RequestListener;
 import com.mulesoft.extensions.request.builder.request.Method;
+import com.mulesoft.extensions.request.builder.util.MockResponseCallback;
 import com.mulesoft.extensions.request.builder.util.SimpleParameterizedType;
 import org.easymock.EasyMock;
 import org.junit.Before;
@@ -31,39 +30,29 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.mulesoft.extensions.request.builder.request.Method.DELETE;
-import static com.mulesoft.extensions.request.builder.request.Method.GET;
-import static com.mulesoft.extensions.request.builder.request.Method.HEAD;
-import static com.mulesoft.extensions.request.builder.request.Method.OPTIONS;
-import static com.mulesoft.extensions.request.builder.request.Method.PATCH;
-import static com.mulesoft.extensions.request.builder.request.Method.POST;
-import static com.mulesoft.extensions.request.builder.request.Method.PUT;
+import static com.mulesoft.extensions.request.builder.request.Method.*;
 import static java.util.function.Function.identity;
-import static org.easymock.EasyMock.anyBoolean;
-import static org.easymock.EasyMock.anyInt;
-import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.fail;
 
-public class RequestBuilderTest {
+public class AsyncRequestBuilderTest {
     private static final Map<String, String> DEFAULT_MAP = Stream.of("test", "test2").collect(Collectors.toMap(identity(), identity()));
     private static final String ACCEPT = "accept";
     private static final String CONTENT_TYPE = "content-type";
     private final HttpEntity DEFAULT_CONTENT;
 
-    public RequestBuilderTest() {
+    public AsyncRequestBuilderTest() {
         try {
             DEFAULT_CONTENT = new ByteArrayHttpEntity(new ObjectMapper().writeValueAsString(DEFAULT_MAP).getBytes(Charset.forName("UTF-8")));
         } catch (JsonProcessingException e) {
@@ -222,48 +211,53 @@ public class RequestBuilderTest {
 
     @Test
     public void testErrorCodeOver299() {
-        try {
-            validator.responseStatusCode = 404;
-            validator.validateGet();
-            fail();
-        } catch (RequestFailedException e) {
-            assertThat(e.getStatusCode(), equalTo(validator.responseStatusCode));
-            assertThat(e.getResponse(), equalTo(validator.response));
-        }
+        validator.responseStatusCode = 404;
+        validator.validateGet();
+        validator.expectedException = RequestFailedException.class;
     }
 
     @Test
     public void testErrorCodeBelow200() {
-        try {
-            validator.responseStatusCode = 199;
-            validator.validateGet();
-            fail();
-        } catch (RequestFailedException e) {
-            assertThat(e.getStatusCode(), equalTo(validator.responseStatusCode));
-            assertThat(e.getResponse(), equalTo(validator.response));
-        }
+        validator.responseStatusCode = 199;
+        validator.validateGet();
+        validator.expectedException = RequestFailedException.class;
     }
 
-    @Test(expected = ResponseEntityParsingException.class)
+    @Test
     public void testErrorParsingResponse() throws IOException {
         validator.responseEntity = EasyMock.mock(HttpEntity.class);
         InputStream content = EasyMock.mock(InputStream.class);
         expect(content.read(anyObject(new byte[]{}.getClass()), anyInt(), anyInt())).andThrow(new IOException("Mock failure."));
         expect(validator.responseEntity.getContent()).andReturn(content).anyTimes();
         replay(content, validator.responseEntity);
+        validator.expectedException = ResponseEntityParsingException.class;
         validator.validateGet();
     }
 
-
     @Test(expected = RequestEntityParsingException.class)
-    public void testErrorParsingRequest() throws IOException {
-        RequestBuilder.get(EasyMock.mock(HttpClient.class), "").entity("", input -> {
+    public void testErrorParsingRequest() {
+        RequestBuilder.get("").entity("", input -> {
             throw new RuntimeException("Fail.");
         });
     }
 
+    @Test
+    public void testRequestTimeout() {
+        validator.exceptionThrown = new TimeoutException();
+        validator.expectedException = RequestTimeoutException.class;
+        validator.validateGet();
+    }
+
+    @Test
+    public void testConnectionException() {
+        validator.exceptionThrown = new IOException();
+        validator.expectedException = RequestConnectionException.class;
+        validator.validateGet();
+    }
+
     private final class Validator {
         private static final String DEFAULT_PATH = "/default";
+        public Class<? extends Throwable> expectedException;
         private HttpClient client;
         private HttpAuthentication authentication;
         private RequestListener[] listeners = new RequestListener[]{};
@@ -280,6 +274,7 @@ public class RequestBuilderTest {
         private MediaType contentType;
         private MediaType accept;
         private ParameterizedType responseType;
+        private Throwable exceptionThrown;
 
         public Validator() {
             response = createMock(HttpResponse.class);
@@ -292,40 +287,40 @@ public class RequestBuilderTest {
 
         public void validateGet() {
             method = GET;
-            validate(RequestBuilder.get(client, path));
+            validate(RequestBuilder.asyncGet(path));
         }
 
         public void validatePost() {
             method = POST;
-            validate(RequestBuilder.post(client, path));
+            validate(RequestBuilder.asyncPost(path));
         }
 
         public void validatePut() {
             method = PUT;
-            validate(RequestBuilder.put(client, path));
+            validate(RequestBuilder.asyncPut(path));
         }
 
         public void validateDelete() {
             method = DELETE;
-            validate(RequestBuilder.delete(client, path));
+            validate(RequestBuilder.asyncDelete(path));
         }
 
         public void validatePatch() {
             method = PATCH;
-            validate(RequestBuilder.patch(client, path));
+            validate(RequestBuilder.asyncPatch(path));
         }
 
         public void validateHead() {
             method = HEAD;
-            validate(RequestBuilder.head(client, path));
+            validate(RequestBuilder.asyncHead(path));
         }
 
         public void validateOptions() {
             method = OPTIONS;
-            validate(RequestBuilder.options(client, path));
+            validate(RequestBuilder.asyncOptions(path));
         }
 
-        private <T> void validate(RequestBuilder<T> requestBuilder) {
+        private <T> void validate(AsyncRequestBuilder<T> requestBuilder) {
             try {
                 Optional.ofNullable(responseType).ifPresent(requestBuilder::responseType);
                 HttpRequest build = requestBuilder
@@ -351,12 +346,15 @@ public class RequestBuilderTest {
                 assertThat(build.getEntity().getBytes(), equalTo(requestEntity.getBytes()));
                 assertThat(build.getHeaderNames(), equalTo(headers.keySet()));
                 assertThat(build.getHeaders().entryList(), equalTo(headers.entryList()));
-                expect(client.send(anyObject(HttpRequest.class), anyInt(), anyBoolean(), eq(authentication))).andReturn(response).anyTimes();
+                CompletableFuture<HttpResponse> completableFuture = new CompletableFuture<>();
+                expect(client.sendAsync(anyObject(HttpRequest.class), anyInt(), anyBoolean(), eq(authentication))).andReturn(completableFuture).anyTimes();
                 expect(response.getStatusCode()).andReturn(responseStatusCode).anyTimes();
                 expect(response.getEntity()).andReturn(responseEntity).anyTimes();
                 replay(client, response);
-                assertThat(requestBuilder.execute(), equalTo(responseHandler.handleResponse(response)));
-            } catch (IOException | TimeoutException e) {
+                requestBuilder.build().execute(client, new MockResponseCallback(responseHandler, response, expectedException));
+                Optional.ofNullable(exceptionThrown).ifPresent(completableFuture::completeExceptionally);
+                Optional.ofNullable(response).filter(response -> Objects.isNull(expectedException)).ifPresent(completableFuture::complete);
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }

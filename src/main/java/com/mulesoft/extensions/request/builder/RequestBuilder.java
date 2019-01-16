@@ -1,302 +1,121 @@
 package com.mulesoft.extensions.request.builder;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mulesoft.extensions.request.builder.exception.RequestEntityParsingException;
 import com.mulesoft.extensions.request.builder.handler.DefaultResponseHandler;
-import com.mulesoft.extensions.request.builder.handler.JacksonResponseHandler;
 import com.mulesoft.extensions.request.builder.handler.ResponseHandler;
-import com.mulesoft.extensions.request.builder.listener.RequestListener;
-import com.mulesoft.extensions.request.builder.parser.ParsingFunction;
-import com.mulesoft.extensions.request.builder.request.Method;
-import com.mulesoft.extensions.request.builder.request.SimpleRequest;
-import com.mulesoft.extensions.request.builder.util.SimpleParameterizedType;
-import org.apache.commons.text.StrSubstitutor;
-import org.mule.runtime.api.metadata.MediaType;
-import org.mule.runtime.api.util.MultiMap;
-import org.mule.runtime.api.util.Preconditions;
-import org.mule.runtime.http.api.client.HttpClient;
-import org.mule.runtime.http.api.client.auth.HttpAuthentication;
-import org.mule.runtime.http.api.domain.entity.ByteArrayHttpEntity;
-import org.mule.runtime.http.api.domain.message.HttpMessageBuilder;
-import org.mule.runtime.http.api.domain.message.request.HttpRequest;
-import org.mule.runtime.http.api.domain.message.response.HttpResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeoutException;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+import static com.mulesoft.extensions.request.builder.request.Method.*;
 
-import static com.mulesoft.extensions.request.builder.request.Method.DELETE;
-import static com.mulesoft.extensions.request.builder.request.Method.GET;
-import static com.mulesoft.extensions.request.builder.request.Method.HEAD;
-import static com.mulesoft.extensions.request.builder.request.Method.OPTIONS;
-import static com.mulesoft.extensions.request.builder.request.Method.PATCH;
-import static com.mulesoft.extensions.request.builder.request.Method.POST;
-import static com.mulesoft.extensions.request.builder.request.Method.PUT;
-import static java.lang.String.format;
-import static java.util.Arrays.asList;
-import static java.util.function.Predicate.isEqual;
+public interface RequestBuilder {
 
-/**
- * Builder class for http requests.<br>
- * To use the requests do the following:<br>
- * <p>
- * <pre>
- * // GET request.
- * RequestBuilder.get(client, &quot;http://mypath.com/endpoint/action&quot;).execute();
- * // POST request.
- * RequestBuilder.post(client, &quot;http://mypath.com/endpoint/action&quot;).execute();
- * // PUT request.
- * RequestBuilder.put(client, &quot;http://mypath.com/endpoint/action&quot;).execute();
- * // DELETE request.
- * RequestBuilder.delete(client, &quot;http://mypath.com/endpoint/action&quot;).execute();
- * </pre>
- * <p>
- * The static methods generate an instance of this builder and allow the following:
- * <ul>
- * <li>Addition of query parameters by using the {@link RequestBuilder#queryParam(String, Object)} or through a {@link MultiMap}.</li>
- * <li>Addition of path parameters by setting them in the path parameter on the static method and assigning them to a placeholder and then setting them using
- * {@link RequestBuilder#pathParam(String, Object)}.</li>
- * <li>Setting an entity object to be sent as part of the request using {@link RequestBuilder#entity(Object)} for the object and {@link RequestBuilder#contentType(String)} for the
- * content type (default is APPLICATION_XML).</li>
- * <li>Handling the {@link HttpResponse} object using a {@link ResponseHandler}.</li>
- * <li>Setting the response type of the request by using the {@link RequestBuilder#responseType(Class, Type...)} </li>
- * <li>Setting headers using {@link RequestBuilder#header(String, Object)}.</li>
- * </ul>
- *
- * @param <T> The type response.
- * @author gaston.ortiz@mulesoft.com
- */
-public class RequestBuilder<T> extends HttpMessageBuilder<RequestBuilder<T>, HttpRequest> {
-
-    private static final Logger logger = LoggerFactory.getLogger(RequestBuilder.class);
-    private final HttpClient client;
-    private final Method method;
-    private final String path;
-    private final Map<String, String> pathParams = new HashMap<>();
-    private final MultiMap<String, String> queryParams = new MultiMap<>();
-    private HttpAuthentication authentication;
-    private ResponseHandler<T> responseHandler;
-    private List<RequestListener> requestListeners = new ArrayList<>();
-    private boolean followRedirects;
-    private int timeout;
-
-    private RequestBuilder(HttpClient client, Method method, String path, ResponseHandler<T> responseHandler) {
-        this.client = client;
-        this.method = method;
-        this.path = path;
-        this.responseHandler = responseHandler;
+    static <T> SyncRequestBuilder<T> get(String path, ResponseHandler<T> responseHandler) {
+        return new SyncRequestBuilder<>(GET, path, responseHandler);
     }
 
-    public RequestBuilder<T> responseType(Class<?> baseType, Type... parameterTypes) {
-        return responseType(new SimpleParameterizedType(baseType, parameterTypes));
+    static SyncRequestBuilder<String> get(String path) {
+        return get(path, new DefaultResponseHandler());
     }
 
-    public RequestBuilder<T> responseType(ParameterizedType parameterizedType) {
-        this.responseHandler = new JacksonResponseHandler<>(parameterizedType);
-        return this;
+    static <T> SyncRequestBuilder<T> post(String path, ResponseHandler<T> responseHandler) {
+        return new SyncRequestBuilder<>(POST, path, responseHandler);
     }
 
-
-    public RequestBuilder<T> responseHandler(ResponseHandler<T> responseHandler) {
-        this.responseHandler = responseHandler;
-        return this;
+    static SyncRequestBuilder<String> post(String path) {
+        return post(path, new DefaultResponseHandler());
     }
 
-    public RequestBuilder<T> header(String key, Object value) {
-        Optional.ofNullable(value).map(Object::toString).filter(isEqual("").negate()).ifPresent(stringValue -> headers.put(key, stringValue));
-        return this;
+    static <T> SyncRequestBuilder<T> put(String path, ResponseHandler<T> responseHandler) {
+        return new SyncRequestBuilder<>(PUT, path, responseHandler);
     }
 
-    public RequestBuilder<T> authentication(HttpAuthentication authentication) {
-        this.authentication = authentication;
-        return this;
+    static SyncRequestBuilder<String> put(String path) {
+        return put(path, new DefaultResponseHandler());
     }
 
-    public RequestBuilder<T> basicAuthentication(String username, String password) {
-        return authentication(HttpAuthentication.basic(username, password).build());
+    static <T> SyncRequestBuilder<T> delete(String path, ResponseHandler<T> responseHandler) {
+        return new SyncRequestBuilder<>(DELETE, path, responseHandler);
     }
 
-    public RequestBuilder<T> ntlmAuthentication(String username, String password) {
-        return authentication(HttpAuthentication.ntlm(username, password).build());
+    static SyncRequestBuilder<String> delete(String path) {
+        return delete(path, new DefaultResponseHandler());
     }
 
-    public RequestBuilder<T> ntlmAuthentication(String username, String password, String domain) {
-        return ntlmAuthentication(format("%s/%s", domain, username), password);
+    static <T> SyncRequestBuilder<T> patch(String path, ResponseHandler<T> responseHandler) {
+        return new SyncRequestBuilder<>(PATCH, path, responseHandler);
     }
 
-    public RequestBuilder<T> queryParam(String key, Object value) {
-        Optional.ofNullable(value).map(Object::toString).filter(isEqual("").negate()).ifPresent(stringValue -> queryParams.put(key, stringValue));
-        return this;
+    static SyncRequestBuilder<String> patch(String path) {
+        return patch(path, new DefaultResponseHandler());
     }
 
-    public RequestBuilder<T> queryParams(MultiMap<String, String> queryParams) {
-        this.queryParams.putAll(queryParams);
-        return this;
+    static <T> SyncRequestBuilder<T> head(String path, ResponseHandler<T> responseHandler) {
+        return new SyncRequestBuilder<>(HEAD, path, responseHandler);
     }
 
-    public RequestBuilder<T> pathParam(String key, Object value) {
-        Optional.ofNullable(value).map(Object::toString).filter(isEqual("").negate()).ifPresent(stringValue -> pathParams.put(key, stringValue));
-        return this;
+    static SyncRequestBuilder<String> head(String path) {
+        return head(path, new DefaultResponseHandler());
     }
 
-    public RequestBuilder<T> pathParams(Map<String, String> pathParams) {
-        Optional.ofNullable(pathParams).ifPresent(this.pathParams::putAll);
-        return this;
+    static <T> SyncRequestBuilder<T> options(String path, ResponseHandler<T> responseHandler) {
+        return new SyncRequestBuilder<>(OPTIONS, path, responseHandler);
     }
 
-    public RequestBuilder<T> entity(Object entity) {
-        return entity(entity, new ObjectMapper()::writeValueAsString);
+    static SyncRequestBuilder<String> options(String path) {
+        return options(path, new DefaultResponseHandler());
     }
 
-    public <I> RequestBuilder<T> entity(I entity, ParsingFunction<I, String> converter) {
-        try {
-            return entity(converter.parse(entity));
-        } catch (Exception e) {
-            throw new RequestEntityParsingException(e);
-        }
+    static <T> AsyncRequestBuilder<T> asyncGet(String path, ResponseHandler<T> responseHandler) {
+        return new AsyncRequestBuilder<>(GET, path, responseHandler);
     }
 
-    public RequestBuilder<T> entity(String entity) {
-        this.entity = new ByteArrayHttpEntity(entity.getBytes(Charset.forName("UTF-8")));
-        return this;
+    static AsyncRequestBuilder<String> asyncGet(String path) {
+        return asyncGet(path, new DefaultResponseHandler());
     }
 
-    public RequestBuilder<T> followRedirects() {
-        this.followRedirects = true;
-        return this;
+    static <T> AsyncRequestBuilder<T> asyncPost(String path, ResponseHandler<T> responseHandler) {
+        return new AsyncRequestBuilder<>(POST, path, responseHandler);
     }
 
-    public RequestBuilder<T> doNotFollowRedirects() {
-        this.followRedirects = false;
-        return this;
+    static AsyncRequestBuilder<String> asyncPost(String path) {
+        return asyncPost(path, new DefaultResponseHandler());
     }
 
-    public RequestBuilder<T> timeout(int timeout) {
-        this.timeout = timeout;
-        return this;
+    static <T> AsyncRequestBuilder<T> asyncPut(String path, ResponseHandler<T> responseHandler) {
+        return new AsyncRequestBuilder<>(PUT, path, responseHandler);
     }
 
-    public RequestBuilder<T> accept(MediaType accept) {
-        return Optional.ofNullable(accept)
-                .map(Object::toString)
-                .map(this::accept)
-                .orElse(this);
+    static AsyncRequestBuilder<String> asyncPut(String path) {
+        return asyncPut(path, new DefaultResponseHandler());
     }
 
-    public RequestBuilder<T> accept(String accept) {
-        return header("Accept", accept);
+    static <T> AsyncRequestBuilder<T> asyncDelete(String path, ResponseHandler<T> responseHandler) {
+        return new AsyncRequestBuilder<>(DELETE, path, responseHandler);
     }
 
-    public RequestBuilder<T> contentType(MediaType contentType) {
-        return Optional.ofNullable(contentType)
-                .map(Object::toString)
-                .map(this::contentType)
-                .orElse(this);
+    static AsyncRequestBuilder<String> asyncDelete(String path) {
+        return asyncDelete(path, new DefaultResponseHandler());
     }
 
-    public RequestBuilder<T> contentType(String contentType) {
-        return header("Content-Type", contentType);
+    static <T> AsyncRequestBuilder<T> asyncPatch(String path, ResponseHandler<T> responseHandler) {
+        return new AsyncRequestBuilder<>(PATCH, path, responseHandler);
     }
 
-    public RequestBuilder<T> onBeforeRequest(RequestListener... listeners) {
-        requestListeners.addAll(asList(listeners));
-        return this;
+    static AsyncRequestBuilder<String> asyncPatch(String path) {
+        return asyncPatch(path, new DefaultResponseHandler());
     }
 
-    public static <T> RequestBuilder<T> get(HttpClient client, String path, ResponseHandler<T> responseHandler) {
-        return new RequestBuilder<>(client, GET, path, responseHandler);
+    static <T> AsyncRequestBuilder<T> asyncHead(String path, ResponseHandler<T> responseHandler) {
+        return new AsyncRequestBuilder<>(HEAD, path, responseHandler);
     }
 
-    public static RequestBuilder<String> get(HttpClient client, String path) {
-        return get(client, path, new DefaultResponseHandler());
+    static AsyncRequestBuilder<String> asyncHead(String path) {
+        return asyncHead(path, new DefaultResponseHandler());
     }
 
-    public static <T> RequestBuilder<T> post(HttpClient client, String path, ResponseHandler<T> responseHandler) {
-        return new RequestBuilder<>(client, POST, path, responseHandler);
+    static <T> AsyncRequestBuilder<T> asyncOptions(String path, ResponseHandler<T> responseHandler) {
+        return new AsyncRequestBuilder<>(OPTIONS, path, responseHandler);
     }
 
-    public static RequestBuilder<String> post(HttpClient client, String path) {
-        return post(client, path, new DefaultResponseHandler());
-    }
-
-    public static <T> RequestBuilder<T> put(HttpClient client, String path, ResponseHandler<T> responseHandler) {
-        return new RequestBuilder<>(client, PUT, path, responseHandler);
-    }
-
-    public static RequestBuilder<String> put(HttpClient client, String path) {
-        return put(client, path, new DefaultResponseHandler());
-    }
-
-    public static <T> RequestBuilder<T> delete(HttpClient client, String path, ResponseHandler<T> responseHandler) {
-        return new RequestBuilder<>(client, DELETE, path, responseHandler);
-    }
-
-    public static RequestBuilder<String> delete(HttpClient client, String path) {
-        return delete(client, path, new DefaultResponseHandler());
-    }
-
-    public static <T> RequestBuilder<T> patch(HttpClient client, String path, ResponseHandler<T> responseHandler) {
-        return new RequestBuilder<>(client, PATCH, path, responseHandler);
-    }
-
-    public static RequestBuilder<String> patch(HttpClient client, String path) {
-        return patch(client, path, new DefaultResponseHandler());
-    }
-
-    public static <T> RequestBuilder<T> head(HttpClient client, String path, ResponseHandler<T> responseHandler) {
-        return new RequestBuilder<>(client, HEAD, path, responseHandler);
-    }
-
-    public static RequestBuilder<String> head(HttpClient client, String path) {
-        return head(client, path, new DefaultResponseHandler());
-    }
-
-    public static <T> RequestBuilder<T> options(HttpClient client, String path, ResponseHandler<T> responseHandler) {
-        return new RequestBuilder<>(client, OPTIONS, path, responseHandler);
-    }
-
-    public static RequestBuilder<String> options(HttpClient client, String path) {
-        return options(client, path, new DefaultResponseHandler());
-    }
-
-    @Override
-    public SimpleRequest build() {
-        Preconditions.checkNotNull(path, "URI must be specified to create an HTTP request");
-        return new SimpleRequest(new StrSubstitutor(pathParams).replace(path), method, headers, queryParams, entity);
-    }
-
-    public T execute() throws IOException, TimeoutException {
-        SimpleRequest request = build();
-        for (RequestListener listener : requestListeners) {
-            logger.debug("Request Listener {} found. Providing request.", listener.getClass());
-            listener.handle(request);
-        }
-        HttpResponse response = client.send(build(), timeout, followRedirects, authentication);
-        logger.debug("Parsing response.");
-        return responseHandler.handleResponse(response);
-    }
-
-    public void execute(Consumer<T> onComplete) {
-        SimpleRequest request = build();
-        for (RequestListener listener : requestListeners) {
-            logger.debug("Request Listener {} found. Providing request.", listener.getClass());
-            listener.handle(request);
-        }
-        this.client.sendAsync(request, timeout, followRedirects, authentication).whenCompleteAsync((response, throwable) -> {
-            logger.debug("Parsing response.");
-            onComplete.accept(responseHandler.handleResponse(response));
-        });
+    static AsyncRequestBuilder<String> asyncOptions(String path) {
+        return asyncOptions(path, new DefaultResponseHandler());
     }
 }
