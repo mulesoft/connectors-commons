@@ -141,6 +141,11 @@ public class RequestBuilder<T> extends HttpMessageBuilder<RequestBuilder<T>, Htt
         return this;
     }
 
+    public RequestBuilder<T> queryParam(String key) {
+        queryParams.put(key, "");
+        return this;
+    }
+
     public RequestBuilder<T> queryParams(MultiMap<String, String> queryParams) {
         this.queryParams.putAll(queryParams);
         return this;
