@@ -17,6 +17,7 @@ import org.mule.runtime.api.util.Preconditions;
 import org.mule.runtime.http.api.client.HttpClient;
 import org.mule.runtime.http.api.client.auth.HttpAuthentication;
 import org.mule.runtime.http.api.domain.entity.ByteArrayHttpEntity;
+import org.mule.runtime.http.api.domain.entity.InputStreamHttpEntity;
 import org.mule.runtime.http.api.domain.message.HttpMessageBuilder;
 import org.mule.runtime.http.api.domain.message.request.HttpRequest;
 import org.mule.runtime.http.api.domain.message.response.HttpResponse;
@@ -24,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
@@ -175,6 +177,11 @@ public class RequestBuilder<T> extends HttpMessageBuilder<RequestBuilder<T>, Htt
 
     public RequestBuilder<T> entity(String entity) {
         this.entity = new ByteArrayHttpEntity(entity.getBytes(Charset.forName("UTF-8")));
+        return this;
+    }
+
+    public RequestBuilder<T> entity(InputStream entity) {
+        this.entity = new InputStreamHttpEntity(entity);
         return this;
     }
 
