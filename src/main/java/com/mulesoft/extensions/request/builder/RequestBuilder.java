@@ -1,42 +1,5 @@
 package com.mulesoft.extensions.request.builder;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mulesoft.extensions.request.builder.exception.RequestEntityParsingException;
-import com.mulesoft.extensions.request.builder.handler.DefaultResponseHandler;
-import com.mulesoft.extensions.request.builder.handler.JacksonResponseHandler;
-import com.mulesoft.extensions.request.builder.handler.ResponseHandler;
-import com.mulesoft.extensions.request.builder.listener.RequestListener;
-import com.mulesoft.extensions.request.builder.parser.ParsingFunction;
-import com.mulesoft.extensions.request.builder.request.Method;
-import com.mulesoft.extensions.request.builder.request.SimpleRequest;
-import com.mulesoft.extensions.request.builder.util.SimpleParameterizedType;
-import org.apache.commons.text.StrSubstitutor;
-import org.mule.runtime.api.metadata.MediaType;
-import org.mule.runtime.api.util.MultiMap;
-import org.mule.runtime.api.util.Preconditions;
-import org.mule.runtime.http.api.client.HttpClient;
-import org.mule.runtime.http.api.client.auth.HttpAuthentication;
-import org.mule.runtime.http.api.domain.entity.ByteArrayHttpEntity;
-import org.mule.runtime.http.api.domain.message.HttpMessageBuilder;
-import org.mule.runtime.http.api.domain.message.request.HttpRequest;
-import org.mule.runtime.http.api.domain.message.response.HttpResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeoutException;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-
 import static com.mulesoft.extensions.request.builder.request.Method.DELETE;
 import static com.mulesoft.extensions.request.builder.request.Method.GET;
 import static com.mulesoft.extensions.request.builder.request.Method.HEAD;
@@ -47,6 +10,42 @@ import static com.mulesoft.extensions.request.builder.request.Method.PUT;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.function.Predicate.isEqual;
+import org.mule.runtime.api.metadata.MediaType;
+import org.mule.runtime.api.util.MultiMap;
+import org.mule.runtime.api.util.Preconditions;
+import org.mule.runtime.http.api.client.HttpClient;
+import org.mule.runtime.http.api.client.auth.HttpAuthentication;
+import org.mule.runtime.http.api.domain.entity.ByteArrayHttpEntity;
+import org.mule.runtime.http.api.domain.message.HttpMessageBuilder;
+import org.mule.runtime.http.api.domain.message.request.HttpRequest;
+import org.mule.runtime.http.api.domain.message.response.HttpResponse;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mulesoft.extensions.request.builder.exception.RequestEntityParsingException;
+import com.mulesoft.extensions.request.builder.handler.DefaultResponseHandler;
+import com.mulesoft.extensions.request.builder.handler.JacksonResponseHandler;
+import com.mulesoft.extensions.request.builder.handler.ResponseHandler;
+import com.mulesoft.extensions.request.builder.listener.RequestListener;
+import com.mulesoft.extensions.request.builder.parser.ParsingFunction;
+import com.mulesoft.extensions.request.builder.request.Method;
+import com.mulesoft.extensions.request.builder.request.SimpleRequest;
+import com.mulesoft.extensions.request.builder.util.SimpleParameterizedType;
+
+import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
+
+import org.apache.commons.text.StrSubstitutor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Builder class for http requests.<br>
@@ -213,6 +212,10 @@ public class RequestBuilder<T> extends HttpMessageBuilder<RequestBuilder<T>, Htt
     public RequestBuilder<T> onBeforeRequest(RequestListener... listeners) {
         requestListeners.addAll(asList(listeners));
         return this;
+    }
+
+    public static <T> RequestBuilder<T> request(HttpClient client, Method method, String path, ResponseHandler<T> responseHandler) {
+        return new RequestBuilder<>(client, method, path, responseHandler);
     }
 
     public static <T> RequestBuilder<T> get(HttpClient client, String path, ResponseHandler<T> responseHandler) {
