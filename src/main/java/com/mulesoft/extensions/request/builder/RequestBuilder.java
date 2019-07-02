@@ -80,6 +80,8 @@ import org.slf4j.LoggerFactory;
 public class RequestBuilder<T> extends HttpMessageBuilder<RequestBuilder<T>, HttpRequest> {
 
     private static final Logger logger = LoggerFactory.getLogger(RequestBuilder.class);
+    private static final String ACCEPT_HEADER_KEY = "Accept";
+    private static final String CONTENT_TYPE_HEADER_KEY = "Content-Type";
     private final HttpClient client;
     private final Method method;
     private final String path;
@@ -114,7 +116,10 @@ public class RequestBuilder<T> extends HttpMessageBuilder<RequestBuilder<T>, Htt
     }
 
     public RequestBuilder<T> header(String key, Object value) {
-        Optional.ofNullable(value).map(Object::toString).filter(isEqual("").negate()).ifPresent(stringValue -> headers.put(key, stringValue));
+        Optional.ofNullable(value)
+                .map(Object::toString)
+                .filter(isEqual("").negate())
+                .ifPresent(stringValue -> headers.put(key, stringValue));
         return this;
     }
 
@@ -195,7 +200,8 @@ public class RequestBuilder<T> extends HttpMessageBuilder<RequestBuilder<T>, Htt
     }
 
     public RequestBuilder<T> accept(String accept) {
-        return header("Accept", accept);
+        headers.remove(ACCEPT_HEADER_KEY);
+        return header(ACCEPT_HEADER_KEY, accept);
     }
 
     public RequestBuilder<T> contentType(MediaType contentType) {
@@ -206,7 +212,8 @@ public class RequestBuilder<T> extends HttpMessageBuilder<RequestBuilder<T>, Htt
     }
 
     public RequestBuilder<T> contentType(String contentType) {
-        return header("Content-Type", contentType);
+        headers.remove(CONTENT_TYPE_HEADER_KEY);
+        return header(CONTENT_TYPE_HEADER_KEY, contentType);
     }
 
     public RequestBuilder<T> onBeforeRequest(RequestListener... listeners) {

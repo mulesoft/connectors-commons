@@ -176,6 +176,25 @@ public class RequestBuilderTest {
     }
 
     @Test
+    public void testMultipleAccept() {
+        MultiMap<String, String> headers = RequestBuilder.get(null, "https://www.mulesoft.com")
+                .accept("asd")
+                .accept("dsa")
+                .build().getHeaders();
+        assertThat(headers.size(), equalTo(1));
+        assertThat(headers.get("Accept"), equalTo("dsa"));
+    }
+
+    @Test
+    public void testNullAccept() {
+        MultiMap<String, String> headers = RequestBuilder.get(null, "https://www.mulesoft.com")
+                .accept("asd")
+                .accept((String)null)
+                .build().getHeaders();
+        assertThat(headers.size(), equalTo(0));
+    }
+
+    @Test
     public void testDifferentResponseType() {
         validator.responseType = new SimpleParameterizedType(String.class);
         validator.responseHandler = new JacksonResponseHandler<String>(String.class);
