@@ -96,7 +96,21 @@ public abstract class AbstractRequestBuilder<RESULT, TYPE extends HttpRequest, S
     }
 
     public SELF header(String key, Object value) {
-        Optional.ofNullable(value).map(Object::toString).filter(isEqual("").negate()).ifPresent(stringValue -> headers.put(key, stringValue));
+        Optional.ofNullable(value)
+                .map(Object::toString)
+                .filter(isEqual("").negate())
+                .ifPresent(stringValue -> headers.put(key, stringValue));
+        return (SELF) this;
+    }
+
+    public SELF overrideHeader(String key, Object value) {
+        Optional.ofNullable(value)
+                .map(Object::toString)
+                .filter(isEqual("").negate())
+                .ifPresent(stringValue -> {
+                    headers.remove(key);
+                    headers.put(key, stringValue);
+                });
         return (SELF) this;
     }
 
@@ -177,7 +191,7 @@ public abstract class AbstractRequestBuilder<RESULT, TYPE extends HttpRequest, S
     }
 
     public SELF accept(String accept) {
-        return header("Accept", accept);
+        return overrideHeader("Accept", accept);
     }
 
     public SELF contentType(MediaType contentType) {
@@ -188,7 +202,7 @@ public abstract class AbstractRequestBuilder<RESULT, TYPE extends HttpRequest, S
     }
 
     public SELF contentType(String contentType) {
-        return header("Content-Type", contentType);
+        return overrideHeader("Content-Type", contentType);
     }
 
     public SELF onBeforeRequest(RequestListener... listeners) {
